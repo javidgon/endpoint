@@ -5,7 +5,6 @@ import requests
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
-from werkzeug.wsgi import SharedDataMiddleware
 from werkzeug.utils import redirect
 from jinja2 import Environment, FileSystemLoader
 
@@ -65,32 +64,15 @@ class EndPoint(object):
         def get_or_create(api_call):
             known_api_call = self.redis.get(api_call)
             if known_api_call:
-                return known_api_call
+                return known_api_call, True
             else:
                 req = requests.get(api_call)
                 self.redis.setex(api_call, req.json(), 60*5)
-                return self.redis.get(api_call)
+                return self.redis.get(api_call), False
         
         api_call = request.form['url']
         self.redis.incr('searches-count:' + api_call)
-        resp = get_or_create(api_call)
+        resp, redis = get_or_create(api_call)
             
-        return self.render_template('index.html', error='', url=api_call, resp=resp)
+        return self.render_template('index.html', error='', url=api_call, resp=resp, redis=redis)
         
-    
-def create_app(redis_host='localhost', redis_port=6379, with_static=True):
-    # Set EndPoint object.
-    app = EndPoint({
-          'redis_host': redis_host,
-          'redis_port': redis_port
-    })
-    if with_static:
-        app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-            '/static':  os.path.join(os.path.dirname(__file__), 'static')
-    })
-    return app
-
-if __name__ == '__main__':
-    from werkzeug.serving import run_simple
-    app = create_app()
-    run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
