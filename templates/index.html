@@ -10,6 +10,9 @@
       <input type=text name=url value="{{ url }}" class=urlinput>
       <input type=submit value="search">
   </form>
+  {% if redis %}
+  	<p>Value retrieved from REDIS</p>
+  {% endif %}
   {% if resp %}
   	<div>
   		<h1>Response:</h1>
