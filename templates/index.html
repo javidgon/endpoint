@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Search new API call{% endblock %}
+{% block body %}
+  <h2>Submit URL</h2>
+  <form action="" method=post>
+    {% if error %}
+      <p class=error><strong>Error:</strong> {{ error }}
+    {% endif %}
+    <p>URL:
+      <input type=text name=url value="{{ url }}" class=urlinput>
+      <input type=submit value="search">
+  </form>
+  {% if resp %}
+  	<div>
+  		<h1>Response:</h1>
+  		{{ resp }}
+  	</div>
+  {% endif %}
+{% endblock %}
