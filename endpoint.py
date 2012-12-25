@@ -13,7 +13,8 @@ class EndPoint(object):
                                  config['redis_port'])
         self.endpoints = reader.get_calls()
         self.url_map = Map([
-            Rule('/', endpoint='process_endpoints'),
+            Rule('/endpoints/', endpoint='get_batch'),
+            Rule('/endpoints/<int:id>', endpoint='get_instance'),
         ])
 
     def __call__(self, environ, start_response):
@@ -61,28 +62,51 @@ class EndPoint(object):
     def make_request(self, endpoint):
         
         return requests.get(endpoint['url'])
+    
+    def process_call(self, endpoint, token=None, limit=None):
+        if self._is_valid_url(endpoint['url']):
+            counter = 0
+            response = self.make_request(endpoint)
+            while True:
+                block = self.map_response(response)
+                if self._is_expected(endpoint, block):
+                    block['pass'] = True
+                    break
+                elif self._should_retry(endpoint, counter):
+                    counter += 1
+                else:
+                    block['pass'] = False
+                    block['log'] = 'Email sent'
+                    # TODO: Send email if an address has been provided.
+                    break
+        else:
+            block = self._generate_error_response(endpoint, 'invalid_message')
+            
+        return block
 
-    def process_endpoints(self, request, **values):
+    def get_batch(self, request, **values):
         cube = []
+        limit = None
+        if 'limit' in dict(request.args).keys():
+            limit = int(request.args['limit'])
         for endpoint in self.endpoints:
-            if self._is_valid_url(endpoint['url']):
-                counter = 0
-                response = self.make_request(endpoint)
-                while True:
-                    block = self.map_response(response)
-                    if self._is_expected(endpoint, block):
-                        block['pass'] = True
-                        break
-                    elif self._should_retry(endpoint, counter):
-                        counter += 1
-                    else:
-                        block['pass'] = False
-                        block['log'] = 'Email sent'
-                        # TODO: Send email if an address has been provided.
-                        break
-            else:
-                block = self._generate_error_response(endpoint, 'invalid_message')
-            cube.append(block)
+            if limit != None:
+                limit = limit - 1
+                if limit == -1:
+                    break
+            cube.append(self.process_call(endpoint))
 
         return Response(json.dumps(cube))
+    
+    def get_instance(self, request, **values):
+        block = []
+        if 'id' in values:
+            try:
+                endpoint = self.endpoints[values['id']]
+            except IndexError:
+                pass
+            else:
+                block = self.process_call(endpoint)
+            
+        return Response(json.dumps(block))
         
