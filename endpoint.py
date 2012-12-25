@@ -1,74 +1,88 @@
-import os
 import redis
 import urlparse
 import requests
+import json
+import datetime
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
-from werkzeug.exceptions import HTTPException, NotFound
-from werkzeug.utils import redirect
-from jinja2 import Environment, FileSystemLoader
+from utils import dispatch_request
 
 class EndPoint(object):
-    def __init__(self, config):
-        self.redis = redis.Redis(config['redis_host'], config['redis_port'])
-        template_path = os.path.join(os.path.dirname(__file__), 'templates')
-        self.jinja_env = Environment(loader=FileSystemLoader(template_path),
-                                     autoescape=True)
+    def __init__(self, config, reader):
+        self.redis = redis.Redis(config['redis_host'],
+                                 config['redis_port'])
+        self.endpoints = reader.get_calls()
         self.url_map = Map([
-            Rule('/', endpoint='search')                
+            Rule('/', endpoint='process_endpoints'),
         ])
+
+    def __call__(self, environ, start_response):
         
-    def render_template(self, template_name, **context):
-        t = self.jinja_env.get_template(template_name)
-        return Response(t.render(context), mimetype='text/html')
-    
-    def dispatch_request(self, request):
-        adapter = self.url_map.bind_to_environ(request.environ)
-        try:
-            endpoint, values = adapter.match()
-            return getattr(self, 'lets_' + endpoint)(request, **values)
-        except HTTPException, e:
-            return e
+        return self.wsgi_app(environ, start_response)
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
-        response = self.dispatch_request(request)
+        response = dispatch_request(self, request)
+
         return response(environ, start_response)
-    
-    # Make the app actually 'callable'
-    def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
-    
-    # Views.
-    def lets_search(self, request, **values):
-        
-        def _is_valid_url(api_call):
-            parts = urlparse.urlparse(api_call)
-            return parts.scheme in ('http','https')
 
-        context = {'error': None, 'api_call':'', 'resp': None, 'redis': None}
-        if request.method == 'POST':
-            context['api_call'] = request.form['api-call']
-            if _is_valid_url(context['api_call']):
-                context['resp'], context['redis'] = self.lets_perform_api_call(request)
-            else:
-                context['error'] = 'Please enter a valid URL'
-        return self.render_template('index.html', **context)
-    
-    
-    def lets_perform_api_call(self, request):
-        
-        def _get_or_create(api_call):
-            known_api_call = self.redis.get(api_call)
-            if known_api_call:
-                return known_api_call, True
-            else:
-                req = requests.get(api_call)
-                self.redis.setex(api_call, req.json(), 60*5)
-                return self.redis.get(api_call), False
+    def _is_valid_url(self, endpoint):
+        parts = urlparse.urlparse(endpoint)
 
-        api_call = request.form['api-call']
-        self.redis.incr('searches-count:' + api_call)
+        return parts.scheme in ('http','https')
+
+    def _should_retry(self, endpoint, counter):
         
-        return _get_or_create(api_call)
+        return counter == endpoint['config']['retries']
+
+    def _is_expected(self, endpoint, block):
+
+        return block['status'] == endpoint['config']['expected-status']
+
+    def _generate_error_message(self, endpoint, mode=None):
+        block = {}
+        block['url'] = endpoint['url']
+        block['pass'] = False
+        if mode == 'invalid_url':
+            block['error'] = 'Sorry, but this address does\'t seem valid'
+        else:
+            block['error'] = 'Sorry, but an unexpected error occurred.'
+
+        return block
+
+    def map_response(self, response):
+        block = {}
+        block['url'] = response.url
+        block['status'] = response.status_code
+        block['date'] = str(datetime.datetime.now())
+
+        return block
+
+    def make_request(self, endpoint):
+        
+        return requests.get(endpoint['url'])
+
+    def process_endpoints(self, request, **values):
+        cube = []
+        for endpoint in self.endpoints:
+            if self._is_valid_url(endpoint['url']):
+                counter = 0
+                response = self.make_request(endpoint)
+                while True:
+                    block = self.map_response(response)
+                    if self._is_expected(endpoint, block):
+                        block['pass'] = True
+                        break
+                    elif self._should_retry(endpoint, counter):
+                        counter += 1
+                    else:
+                        block['pass'] = False
+                        block['log'] = 'Email sent'
+                        # TODO: Send email if an address has been provided.
+                        break
+            else:
+                block = self._generate_error_response(endpoint, 'invalid_message')
+            cube.append(block)
+
+        return Response(json.dumps(cube))
         
