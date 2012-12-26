@@ -14,3 +14,9 @@ SMTP_FROM = ''
 SMTP_TO = ''
 SMTP_MSG = ''
 SMTP_STATUS = False
+
+# Predefined blocks.
+SERVER_UNREACHABLE = {
+                      "status": 404,
+                      "log": "Server unreachable"
+                      }

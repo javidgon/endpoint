@@ -1,18 +1,25 @@
 # Endpoints declaration.
-   - url: "http://www.github.com/users/javidgon"
+   - url: "http://127.0.0.1:5100/mock/"
+     alias: get
+     method: "GET"
      config:
        auth-header: False
        request-body: False
        expected-status: 200
        retries: 3
-       refresh-intervals: 5
-       email: javidgon@gmail.com
-   - url: "http://www.github.com/users/invented"
+   - url: "http://127.0.0.1:5100/mock/post"
+     alias: post
+     method: "POST"
      config:
        auth-header: False
-       header: False
-       request-body: False
-       expected-status: 404
-       retries: 3
-       refresh-intervals: 4
-       email: javidgon@gmail.com
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       expected-status: 200
+       retries: 5
+   - url: "http://127.0.0.1:5100/mock/put/1"
+     alias: put
+     method: "PUT"
+     config:
+       auth-header: False
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       expected-status: 200
+       retries: 5

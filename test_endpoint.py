@@ -29,10 +29,16 @@ class EndPointTestCase(unittest.TestCase):
         assert len(output) == 1
         assert validictory.validate(output, schema_batch) == None
 
-    def test_fetch_single_endpoint(self):
+    def test_fetch_single_endpoint_with_id(self):
         resp = self.client.get('/endpoints/0')
         output = json.loads(resp.data)
 
+        assert validictory.validate(output, schema_single) == None
+    
+    def test_fetch_single_endpoint_with_alias(self):
+        resp = self.client.get('/endpoints/post')
+        output = json.loads(resp.data)
+        
         assert validictory.validate(output, schema_single) == None
     
     def test_fetch_unexisting_endpoint(self):
