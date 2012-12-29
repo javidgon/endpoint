@@ -4,3 +4,4 @@ redis
 requests
 pyYAML
 validictory
+nose
