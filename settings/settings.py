@@ -1,6 +1,8 @@
 import os
 import smtplib
+import datetime
 from jinja2 import Environment, FileSystemLoader
+from collections import OrderedDict
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__),
                                     'templates')
@@ -14,3 +16,8 @@ SMTP_FROM = ''
 SMTP_TO = ''
 SMTP_MSG = ''
 SMTP_STATUS = False
+
+# TESTING YAML PATH
+TESTING_YAML_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 
+                            '../tests','endpoints.yaml'))
+
