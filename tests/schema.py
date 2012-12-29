@@ -1,11 +1,12 @@
 schema_batch = {"type": "array",
           "items": {"type": "object",
                         "properties": {
-                                       "url": {"type": "string"},
-                                       "status": {"type": "integer"},
-                                       "date": {"type": "string"},
+                                       "url": {"type": "string", "required": False},
+                                       "method": {"type": "string", "required": False},
+                                       "status_code": {"type": "integer"},
+                                       "requested_at": {"type": "string"},
                                        "log": {"type": "string", "required": False},
-                                       "pass": {"type": "boolean"}
+                                       "tests_passed": {"type": "boolean"}
                                        }
                          }
           }
@@ -13,9 +14,21 @@ schema_batch = {"type": "array",
 schema_single ={"type": "object",
                         "properties": {
                                        "url": {"type": "string"},
-                                       "status": {"type": "integer"},
-                                       "date": {"type": "string"},
+                                       "method": {"type": "string"},
+                                       "status_code": {"type": "integer"},
+                                       "requested_at": {"type": "string"},
                                        "log": {"type": "string", "required": False},
-                                       "pass": {"type": "boolean"}
+                                       "tests_passed": {"type": "boolean"}
+                                       }
+                }
+
+schema_error = {"type": "object",
+                        "properties": {
+                                       "url": {"type": "string", "required": False},
+                                       "method": {"type": "string", "required": False},
+                                       "status_code": {"type": "integer"},
+                                       "requested_at": {"type": "string"},
+                                       "log": {"type": "string", "required": False},
+                                       "tests_passed": {"type": "boolean"}
                                        }
                 }

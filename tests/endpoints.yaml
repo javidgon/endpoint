@@ -1,0 +1,109 @@
+# Endpoints declaration.
+   - url: "http://127.0.0.1:5100/mock"
+     alias: get
+     method: "GET"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: False
+       retries: 3
+     asserts:
+       status-code: 200
+   - url: "http://127.0.0.1:5100/mock/post"
+     alias: post
+     method: "POST"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 200
+   - url: "http://127.0.0.1:5100/mock/post/basic-auth"
+     alias: post_basic
+     method: "POST"
+     auth:
+       type: basic
+       user: dev
+       pass: example
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 200
+   - url: "http://127.0.0.1:5100/mock/post/digest-auth"
+     alias: post_digest
+     method: "POST"
+     auth:
+       type: digest
+       user: dev
+       pass: example
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 200
+   - url: "http://127.0.0.1:5100/mock/post/basic-auth"
+     alias: post_basic_unauthorized
+     method: "POST"
+     auth:
+       type: basic
+       user: dev
+       pass: friend
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 401
+   - url: "http://127.0.0.1:5100/mock/post/digest-auth"
+     alias: post_digest_unauthorized
+     method: "POST"
+     auth:
+       type: digest
+       user: dev
+       pass: friend
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 401
+   - url: "http://127.0.0.1:5100/mock/put/1"
+     alias: put
+     method: "PUT"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 200
+   - url: "http://0.0.0.0:5111"
+     alias: inactive_server
+     method: "GET"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: False
+       retries: 3
+     asserts:
+       status-code: 500
+   - url: "hello"
+     alias: invalid_url
+     method: "GET"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: False
+       retries: 3
+     asserts:
+       status-code: 400
