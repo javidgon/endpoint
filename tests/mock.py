@@ -6,7 +6,7 @@ from werkzeug.routing import Map, Rule
 from werkzeug.http import (parse_authorization_header,
                            parse_www_authenticate_header)
 from werkzeug.exceptions import Unauthorized, Forbidden
-from werkzeug.contrib.authdigest import RealmDigestDB
+from endpoint.contrib.authdigest import RealmDigestDB
 from endpoint.utils.utils import dispatch_request
 
 class Mock(object):
