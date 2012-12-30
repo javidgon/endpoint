@@ -1,11 +1,12 @@
 import urlparse
 import json
 
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, Timeout
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
+from werkzeug.exceptions import NotImplemented
 from endpoint.utils.utils import (dispatch_request, send_notification, make_request,
-                                  build_response, render_http_error)
+                                  build_response, render_http_response)
 from endpoint.settings.settings import SMTP_STATUS
 
 class Sentinel(object):
@@ -45,10 +46,18 @@ class Sentinel(object):
         if self.is_valid_url(endpoint['url']):
             try:
                 response = make_request(endpoint)
-            except (ConnectionError, NotImplemented):
-                return render_http_error('SERVER_UNREACHABLE',
+            except ConnectionError:
+                return render_http_response('SERVER_UNREACHABLE',
                                          500,
-                                         endpoint['asserts']['status-code'])
+                                         endpoint)
+            except NotImplemented:
+                return render_http_response('NOT_IMPLEMENTED',
+                                         501,
+                                         endpoint)
+            except Timeout:
+                return render_http_response('REQUEST_TIMEOUT',
+                                         408,
+                                         endpoint)
             else:
                 tests_passed = False
                 log = None
@@ -64,9 +73,9 @@ class Sentinel(object):
                             send_notification()
                         break
         else:
-            return render_http_error('INVALID_URL',
+            return render_http_response('BAD_REQUEST',
                                      400,
-                                     endpoint['asserts']['status-code'])
+                                     endpoint)
             
         return build_response(response, tests_passed)
 
