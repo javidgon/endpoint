@@ -1,9 +1,9 @@
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from endpoint.runners.run_app import create_app
+from endpoint.run_app import create_app
 from endpoint.tests.schema import (schema_batch, schema_single,
                                    schema_error)
-from endpoint.settings.settings import TESTING_YAML_PATH
+from endpoint.settings import TESTING_YAML_PATH
 import unittest
 import validictory
 import json

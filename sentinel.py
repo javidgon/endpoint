@@ -5,9 +5,9 @@ from requests.exceptions import ConnectionError, Timeout
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import NotImplemented
-from endpoint.utils.utils import (dispatch_request, send_notification, make_request,
+from endpoint.utils import (dispatch_request, send_notification, make_request,
                                   build_response, render_http_response)
-from endpoint.settings.settings import SMTP_STATUS
+from endpoint.settings import SMTP_STATUS
 
 class Sentinel(object):
     def __init__(self, config, reader):
