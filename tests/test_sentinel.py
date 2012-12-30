@@ -29,7 +29,7 @@ class SentinelTestCase(unittest.TestCase):
         resp = self.client.get('/')
         output = json.loads(resp.data)
         
-        assert len(output) == 9
+        assert len(output) == 11
         assert validictory.validate(output, schema_batch) == None
         
     def test_fetch_endpoints_with_limit(self):
@@ -126,7 +126,7 @@ class SentinelTestCase(unittest.TestCase):
         resp = self.client.get('/invalid_url')
         output = json.loads(resp.data)
         
-        assert output['log'] == 'Invalid URL'
+        assert output['log'] == 'BAD_REQUEST'
         assert output['tests_passed'] == True
         assert validictory.validate(output, schema_error) == None
         
@@ -138,6 +138,30 @@ class SentinelTestCase(unittest.TestCase):
         resp = self.client.get('/inactive_server')
         output = json.loads(resp.data)
         
-        assert output['log'] == 'Server unreachable'
+        assert output['log'] == 'SERVER_UNREACHABLE'
+        assert output['tests_passed'] == True
+        assert validictory.validate(output, schema_error) == None
+        
+    def test_fetch_endpoint_with_high_speed_requirements(self):
+        """
+        Check what we'd get if we tried to get a response
+        within a utopic timing range
+        """
+        resp = self.client.get('/request_timeout')
+        output = json.loads(resp.data)
+        
+        assert output['log'] == 'REQUEST_TIMEOUT'
+        assert output['tests_passed'] == True
+        assert validictory.validate(output, schema_error) == None
+        
+    def test_fetch_endpoint_with_an_unimplemented_method(self):
+        """
+        Check what we'd get if we tried to get a response
+        using a unimplemented method
+        """
+        resp = self.client.get('/not_implemented')
+        output = json.loads(resp.data)
+        
+        assert output['log'] == 'NOT_IMPLEMENTED'
         assert output['tests_passed'] == True
         assert validictory.validate(output, schema_error) == None

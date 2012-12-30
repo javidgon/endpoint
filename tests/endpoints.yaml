@@ -11,6 +11,8 @@
        retries: 3
      asserts:
        status-code: 200
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/post"
      alias: post
      method: "POST"
@@ -23,6 +25,8 @@
        retries: 5
      asserts:
        status-code: 200
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/post/basic-auth"
      alias: post_basic
      method: "POST"
@@ -35,6 +39,8 @@
        retries: 5
      asserts:
        status-code: 200
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/post/digest-auth"
      alias: post_digest
      method: "POST"
@@ -47,6 +53,8 @@
        retries: 5
      asserts:
        status-code: 200
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/post/basic-auth"
      alias: post_basic_unauthorized
      method: "POST"
@@ -59,6 +67,8 @@
        retries: 5
      asserts:
        status-code: 401
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/post/digest-auth"
      alias: post_digest_unauthorized
      method: "POST"
@@ -71,6 +81,8 @@
        retries: 5
      asserts:
        status-code: 401
+       waiting-time: 0.5
+       
    - url: "http://127.0.0.1:5100/mock/put/1"
      alias: put
      method: "PUT"
@@ -83,6 +95,8 @@
        retries: 5
      asserts:
        status-code: 200
+       waiting-time: 0.5
+       
    - url: "http://0.0.0.0:5111"
      alias: inactive_server
      method: "GET"
@@ -95,6 +109,8 @@
        retries: 3
      asserts:
        status-code: 500
+       waiting-time: 0.5
+       
    - url: "hello"
      alias: invalid_url
      method: "GET"
@@ -107,3 +123,32 @@
        retries: 3
      asserts:
        status-code: 400
+       waiting-time: 0.5
+       
+   - url: "http://127.0.0.1:5100/mock/put/1"
+     alias: request_timeout
+     method: "PUT"
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 408
+       waiting-time: 0.00001
+       
+   - url: "http://127.0.0.1:5100/mock/"
+     alias: not_implemented
+     method: PATH
+     auth:
+       type: False
+       user: False
+       pass: False
+     config:
+       request-body: {"amount":10000, "service":"writing blog posts"}
+       retries: 5
+     asserts:
+       status-code: 501
+       waiting-time: 0.5
