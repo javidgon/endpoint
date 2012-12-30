@@ -5,7 +5,7 @@ from collections import OrderedDict
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, NotImplemented
-from endpoint.settings.settings import (JINJA_ENV,SMTP_SERVER,
+from endpoint.settings import (JINJA_ENV,SMTP_SERVER,
                       SMTP_LOGIN, SMTP_PASSWORD, SMTP_FROM,
                       SMTP_TO, SMTP_MSG)
     

@@ -7,7 +7,7 @@ from werkzeug.http import (parse_authorization_header,
                            parse_www_authenticate_header)
 from werkzeug.exceptions import Unauthorized, Forbidden
 from endpoint.contrib.authdigest import RealmDigestDB
-from endpoint.utils.utils import dispatch_request
+from endpoint.utils import dispatch_request
 
 class Mock(object):
     def __init__(self):

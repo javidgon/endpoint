@@ -1,9 +1,9 @@
 import sys
 
-from endpoint.sentinels.sentinel import Sentinel
-from endpoint.runners.run_mock import create_mock
+from endpoint.sentinel import Sentinel
+from endpoint.run_mock import create_mock
 from endpoint.readers.yaml_reader import YamlReader
-from endpoint.settings.settings import TESTING_YAML_PATH
+from endpoint.settings import TESTING_YAML_PATH
 
 def create_app(test_mode=True, yalm_file=None):
     reader = YamlReader(yalm_file)
