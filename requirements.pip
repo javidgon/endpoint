@@ -1,6 +1,6 @@
 werkzeug
 Jinja2
-redis
+fabric
 requests
 pyYAML
 validictory
