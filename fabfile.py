@@ -6,6 +6,7 @@ from endpoint.settings import SERVER
 import os
 import time
 import requests
+import sys
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,6 +14,7 @@ def test_suite():
     """
     Run the ENDPOINT application's tests suite.
     """
+    sys.path.append(os.path.join(PATH,'..'))
     with cd(PATH):
         local("python run_mock.py &")
         time.sleep(3)
@@ -31,6 +33,7 @@ def supervise(yml_file="", mode='one_time', interval=60, test_mode=False):
     successes = []
     errors = []
     
+    sys.path.append(os.path.join(PATH,'..'))
     if not os.path.exists(os.path.join(PATH, yml_file)):
         abort("YML file not found.")
     try:
@@ -62,7 +65,7 @@ def supervise(yml_file="", mode='one_time', interval=60, test_mode=False):
             abort("Sorry but this mode is not currently supported.")
         print "Stopping server..."
         local("killall python run_app.py")
-
+    
 def _process_response(yml_file, successes, errors):
     print "Making the requests..."
     response = requests.get("http://%s:%s/" % 
