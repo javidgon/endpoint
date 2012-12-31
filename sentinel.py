@@ -6,17 +6,21 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import NotImplemented
 from endpoint.utils import (dispatch_request, send_notification, make_request,
-                                  build_response, render_http_response)
+                            render_response)
 from endpoint.settings import SMTP_STATUS
 
 class Sentinel(object):
+    """
+    Sentinel will be in charge of making requests using the
+    endpoints defined in the .yml file.
+    """
     def __init__(self, config, reader):
         self.test_mode = config['test_mode']
         self.endpoints = reader.get_calls()
         self.url_map = Map([
-            Rule('/', endpoint='get_batch'),
-            Rule('/<int:id>', endpoint='get_instance'),
-            Rule('/<alias>', endpoint='get_instance')
+            Rule('/', endpoint='get_batch_of_responses'),
+            Rule('/<int:id>', endpoint='get_response'),
+            Rule('/<alias>', endpoint='get_response')
         ])
 
     def __call__(self, environ, start_response):
@@ -29,13 +33,24 @@ class Sentinel(object):
         return response(environ, start_response)
 
     def is_valid_url(self, endpoint):
+        """
+        Check is the passed url is valid
+        """
         parts = urlparse.urlparse(endpoint)
         return parts.scheme in ('http','https')
 
-    def should_retry(self, endpoint, counter): 
+    def should_retry(self, endpoint, counter):
+        """
+        Check if the sentinel should continue trying to
+        get a proper response from the endpoint. This value
+        is passed in the .yml file.
+        """ 
         return counter == endpoint['config']['retries']
 
-    def test_response(self, endpoint, response):
+    def verify_status_code(self, endpoint, response):
+        """
+        Verify if the status code is the right one.
+        """
         result = False
         if response.status_code == endpoint['asserts']['status-code']:
             result = True
@@ -43,27 +58,29 @@ class Sentinel(object):
         return result
    
     def process_call(self, endpoint):
+        """
+        Process a single request and build a response.
+        """
         if self.is_valid_url(endpoint['url']):
             try:
                 response = make_request(endpoint)
             except ConnectionError:
-                return render_http_response('SERVER_UNREACHABLE',
-                                         500,
-                                         endpoint)
+                return render_response(error='SERVER_UNREACHABLE',
+                                         status_code=500,
+                                         obj=endpoint)
             except NotImplemented:
-                return render_http_response('NOT_IMPLEMENTED',
-                                         501,
-                                         endpoint)
+                return render_response(error='NOT_IMPLEMENTED',
+                                         status_code=501,
+                                         obj=endpoint)
             except Timeout:
-                return render_http_response('REQUEST_TIMEOUT',
-                                         408,
-                                         endpoint)
+                return render_response(error='REQUEST_TIMEOUT',
+                                         status_code=408,
+                                         obj=endpoint)
             else:
                 tests_passed = False
-                log = None
                 counter = 0
                 while True:
-                    if self.test_response(endpoint, response):
+                    if self.verify_status_code(endpoint, response):
                         tests_passed = True
                         break
                     elif self.should_retry(endpoint, counter):
@@ -73,13 +90,18 @@ class Sentinel(object):
                             send_notification()
                         break
         else:
-            return render_http_response('BAD_REQUEST',
-                                     400,
-                                     endpoint)
+            return render_response(error='BAD_REQUEST',
+                                     status_code=400,
+                                     obj=endpoint)
             
-        return build_response(response, tests_passed)
+        return render_response(status_code=response.status_code,
+                                response=response,
+                                tests_passed=tests_passed)
 
-    def get_batch(self, request, **values):
+    def get_batch_of_responses(self, request, **values):
+        """
+        Get a batch of responses from the respective requests.
+        """
         cube = []
         limit = None
         if 'limit' in dict(request.args).keys():
@@ -93,7 +115,10 @@ class Sentinel(object):
 
         return Response(json.dumps(cube))
     
-    def get_instance(self, request, **values):
+    def get_response(self, request, **values):
+        """
+        Get a single response from a single request.
+        """
         block = {}
         counter = 0
         if 'id' in values and values.get('id', 0) > 0:
