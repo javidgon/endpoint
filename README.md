@@ -2,7 +2,8 @@ Endpoint
 ========
 [![Build Status](https://travis-ci.org/javidgon/endpoint.png)](https://travis-ci.org/javidgon/endpoint)
 
-**Endpoint is for APIs the same as a CI system is for Unit tests.**
+**Endpoint is to APIs the same as Unit tests are to functions.**
+
 It's main purpose is to check if the API's endpoints are working on the proper way.
 That "proper way" is specified in a .yml file with a defined structure that will work
 as a "strict sentinel" that supervises our specific responses' requirements.
