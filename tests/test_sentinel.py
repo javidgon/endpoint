@@ -3,7 +3,7 @@ from werkzeug.wrappers import BaseResponse
 from endpoint.run_app import create_app
 from endpoint.tests.schema import (schema_batch, schema_single,
                                    schema_error)
-from endpoint.settings import TESTING_YAML_PATH
+from endpoint.settings import TESTING_YML_PATH
 import unittest
 import validictory
 import json
@@ -11,7 +11,7 @@ import json
 class SentinelTestCase(unittest.TestCase):
     def setUp(self):
         self.client = Client(create_app(test_mode=True, 
-                             yalm_file=TESTING_YAML_PATH), BaseResponse)
+                             yalm_file=TESTING_YML_PATH), BaseResponse)
     
     def test_redirect_wrong_url(self):
         """
