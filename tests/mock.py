@@ -3,9 +3,8 @@ import datetime
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
-from werkzeug.http import (parse_authorization_header,
-                           parse_www_authenticate_header)
-from werkzeug.exceptions import Unauthorized, Forbidden
+from werkzeug.http import (parse_authorization_header)
+from werkzeug.exceptions import Unauthorized
 from endpoint.contrib.authdigest import RealmDigestDB
 from endpoint.utils import dispatch_request
 
