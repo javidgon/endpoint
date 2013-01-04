@@ -2,29 +2,31 @@ Endpoint
 ========
 [![Build Status](https://travis-ci.org/javidgon/endpoint.png)](https://travis-ci.org/javidgon/endpoint)
 
-**Endpoint is to APIs the same as Unit tests are to functions.**
+**Endpoint is to APIs the same as Unit tests are to the code.**
 
-It's main purpose is to check if the API's endpoints are working on the proper way.
-That "proper way" is specified in a .yml file with a defined structure that will work
-as a "strict sentinel" that supervises our specific responses' requirements.
+It's main purpose is to check if your API's endpoints are working properly.
+That "proper way" is specified in a .yml file with a defined structure that provides
+your specific responses' requirements for each call to Endpoint.
 
-At the time of the 0.1 version, Endpoint supports API calls using **GET**, **POST** and **PUT** methods,
+What can it be useful for? Well, let's think about a critical performance web service which
+should serve responses within 0.2 seconds. Slower than that should be considerer as unacceptable.
+With Endpoint, you can easily specify your requirements and trigger alerts in real time
+if they have not met. 
+
+Endpoint supports API calls using **GET**, **POST** and **PUT** methods,
 with **Basic** and **Digest AUTH**. Next step will be to include OAuth support as well, as many important
 systems are using this protocol.
 
-As we said before, Endpoint allows us to easily check the "validity" of a response by matching
-the results with the mentioned .yml file. This file specify a set of "assertions" defined by us, 
-as we do it at the normal Unit tests methods. Currently, It's possible to assert about "status-code"
-(response's status code) and "waiting-time" (response's timing). 
+Currently, It's possible to assert about "status-code" (response's status code) and "waiting-time" (response's timing). 
 If any of those assertions doesn't meet with the real response, some things will happen behind the scenes...
-First, Endpoint will mark it immediately with **tests_passed: False** in the returned JSON,
+First, Endpoint will mark the returned JSON with **tests_passed: False**,
 second, some events as email notification will be triggered automatically (though It's fully customizable by the user)
 and, finally, the output will inform the user accordingly.
 
 For sake of testing and learning, Endpoint includes both a **mock server** and a **endpoint.yml** example file in the
 /tests folder. For running the Test Suite just type: **fab test_suite**
 
-In order to improve the clearness, let's dive into the .yml structure:
+In order to improve the clearness, let's dive into the .yml structure that Endpoint recognizes:
 
 ```yaml
 # Endpoints declaration.
@@ -44,8 +46,7 @@ In order to improve the clearness, let's dive into the .yml structure:
        waiting-time: 0.5 # Should take less than 0.5 seconds.
 ```
 
-> Please note(second time) that if any of those assertions fails, that call will be marked as **tests_passed: False** in the JSON obj.
-You can easily try this out by typing the following line at the terminal:
+> You can easily try this out by typing the following line at the terminal:
 
 ```
 	curl http://127.0.0.1:5000/get_endpoint
@@ -56,7 +57,7 @@ You can easily try this out by typing the following line at the terminal:
 Output structure
 ----------------
 
-Endpoint will respond you with a JSON obj with the following structure (Using *tests/endpoint.yml* as example):
+Endpoint responds you with a JSON obj with the following structure (Using *tests/endpoint.yml* as example):
 
 <pre>
 (endpoint)$ curl http://127.0.0.1:5000
@@ -79,11 +80,11 @@ Endpoint will respond you with a JSON obj with the following structure (Using *t
 
 API
 ---
-Endpoint has both automatic and manual mode. Let's discover them!
+Endpoint supports both automatic and manual flavors.
 
-**1. Automatic mode.**
+**1. Automatic flavor.**
 
-* This mode lets you test all your API on a painless way, just by typing:
+* Lets you test all your API on a painless and automate way, just by typing:
 
 ```
 	fab supervise:yml_file=<yml_path**>, mode:<one_time or strict**>, interval: <60**>, test_mode: <True or False**>
@@ -97,21 +98,18 @@ Endpoint has both automatic and manual mode. Let's discover them!
 	fab supervise:yml_file=endpoint.yml 						  # Check just a single time
 ```
 
-* You probable have noticed that we have a mode parameter with two possible values, what's all this about?
-	* 'one_way': Check all the endpoints a single time (Interval param is not used)
+* You probably have noticed that we have a mode parameter with two possible values.
+	* 'one_way': Check all the endpoints a single time (Interval param not used)
 	* 'strict': Check all the endpoints regularly every <interval> seconds. Isn't it great?
 	
-**2. Manual mode.**
+**2. Manual flavor.**
 
-* This mode just runs the server and let you the responsibility of asking to the Endpoint server.
-  We saw an example of this above:
+* Runs the server and nothing else. You can then start either using tools as **'curl'** or simply
+  accessing to **http://127.0.0.1:5000** at your favorite browser.
   
 ```
 	python run_app.py <yml_path>
 ``` 
-
-* Just run the server and nothing else. You can then start either using tools as **'curl'** or simple
-  accessing to **http://127.0.0.1:5000** at your favorite browser.
   
 Tests
 -----
@@ -123,7 +121,7 @@ As we mentioned before, you can run the **Endpoint's Test Suite** just by typing
 ```
 > It will use both the endpoint.yml file from the tests/ folder and the mock server.
 
-You should get then something like:
+You should get then something similar to:
 
 <pre>
 
@@ -138,12 +136,28 @@ OK
 [localhost] local: pkill -n python run_mock.py
 
 </pre>
+
+Making of
+---------
+
+Endpoint has been created using **Werkzeug**, which provides all the logic behind the routing process,
+the **Requests** library, in charge of making all the requests to the different enpoints,
+and **Fabric**, which comes in handy in the verification process«s automation.
+
+Please visit each project for further information.
+
+Contributing
+------------
+
+If you'd like to contribute, just Fork the repository, create a branch with your changes and send a pull request. 
+Don't forget appending your name to AUTHORS ;)
+
 ---
 
 BSD LICENSE
 -------
 
-Copyright (c) 2012 by Jose Vidal.
+Copyright (c) 2012 by Jose Vidal and AUTHORS (further information in AUTHORS file).
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
