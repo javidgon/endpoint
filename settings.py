@@ -1,5 +1,4 @@
 import os
-import smtplib
 
 # Development and mock server configs
 SERVER = {"host": "127.0.0.1", "port": 5000}
@@ -15,6 +14,5 @@ SMTP_MSG = ''
 SMTP_STATUS = False
 
 # TESTING YML PATH
-TESTING_YML_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 
-                            'tests','endpoint.yml'))
+SPECS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'specs'))
 
