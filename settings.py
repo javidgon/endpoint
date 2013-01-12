@@ -5,7 +5,7 @@ SERVER = {"host": "127.0.0.1", "port": 5000}
 MOCK_SERVER = {"host": "127.0.0.1", "port": 5100}
 
 # SMTP settings.
-SMTP_SERVER = smtplib.SMTP('smtp.gmail.com',587) #port 465 or 587
+SMTP_SERVER = ''
 SMTP_LOGIN = ''
 SMTP_PASSWORD = ''
 SMTP_FROM = ''
