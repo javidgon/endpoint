@@ -1,6 +1,6 @@
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from endpoint.run_app import application
+from endpoint.run_server import application
 from endpoint.tests.schema import (schema_batch, schema_single,
                                    schema_error)
 import unittest

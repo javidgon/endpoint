@@ -1,5 +1,4 @@
 from endpoint.tests.mock import Mock
-from endpoint.settings import MOCK_SERVER
 
 def create_mock():
     # Create Mock
@@ -7,6 +6,6 @@ def create_mock():
 
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
-
-    mock = create_mock()
-    run_simple(MOCK_SERVER['host'], MOCK_SERVER['port'], mock, use_debugger=True, use_reloader=True)
+    from endpoint.settings import MOCK_SERVER
+    # Just for Development. Use WSGI instead in Production.
+    run_simple(MOCK_SERVER['host'], MOCK_SERVER['port'], create_mock(), use_debugger=True, use_reloader=True)
