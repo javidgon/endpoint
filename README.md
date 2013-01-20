@@ -2,28 +2,29 @@ Endpoint
 ========
 [![Build Status](https://travis-ci.org/javidgon/endpoint.png)](https://travis-ci.org/javidgon/endpoint)
 
-**Endpoint is to APIs the same as Unit tests are to functions.**
+**Smart testing framework for APIs**
 
-It's main purpose is to check if your API's endpoints are working on the proper way.
-That "proper way" is specified in a .yml file with a defined structure that will work
-as a "strict sentinel" that supervises our specific responses' requirements.
+The Endpoint's main goal is to check if your API's endpoints are working properly.
+That "proper way" is specified in a *Specification file* with a defined structure that will work
+as a "strict sentinel" that supervises your responses' requirements.
 
 At the time of the 0.1 version, Endpoint supports API calls using **GET**, **POST** and **PUT** methods,
 with **Basic** and **Digest AUTH**. Next step will be to include OAuth support as well, as many important
 systems are using this protocol.
 
-The specification file, as we name it, specifies a set of "assertions" defined by us, 
-as we do it in a normal Unit tests method. Currently, It's possible to assert about "status-code"
-(response's status code) and "waiting-time" (response's timing). 
+The *Specification file* defines a set of "assertions" as we do it in a normal Unit test function.
+Currently, It's possible to assert about **"status-code" (response's status code)** and
+**"waiting-time" (response's timing)**.
+
 If any of those assertions doesn't meet with the real response, some things will happen behind the scenes...
-First, Endpoint will mark it immediately with **tests_passed: False** in the returned JSON,
-second, some events as email notification will be triggered automatically (though It's fully customizable by the user)
+First, Endpoint will mark immediately the returned JSON with **tests_passed: False**,
+second, some events as email notification will be triggered automatically (It's fully customizable by the user though)
 and, finally, the output will inform the user accordingly.
 
 For sake of testing and learning, Endpoint includes both a **mock server** and a **tests.yml** example file.
 For running the Test Suite just type: **fab test_suite**
 
-In order to improve the clearness, let's dive into the specification file's structure:
+Let's dive into the specification file's structure:
 
 ```yaml
 # Endpoints declaration.
@@ -42,23 +43,23 @@ In order to improve the clearness, let's dive into the specification file's stru
        status-code: 200 # Expected status code.
        waiting-time: 0.5 # Should take less than 0.5 seconds.
 ```
-> Nice! Save this file now in the specs folder, so the server can find it later on.
+> These files will be stored in the **specs/** folder, so the server can find them later on.
 
-> You can easily try these endpoints out by typing the following line at the terminal:
+> You can easily try these endpoints out by typing the following line in the CLI:
 
 ```
-	curl http://127.0.0.1:5000/<spec_filename>/
+	curl http://127.0.0.1:5000/<spec_file>/
 ```
 > Note that you also can get one single endpoint by doing:
 ```
-	curl http://127.0.0.1:5000/<spec_filename>/<endpoint>
+	curl http://127.0.0.1:5000/<spec_file>/<endpoint_alias>
 ```
 > Wait, the server should be running! If it doesn't, just do **python run_server.py**
 
 Output structure
 ----------------
 
-Endpoint will respond you with a JSON obj with the following structure:
+Endpoint will respond you with a JSON object with the following structure:
 
 <pre>
 (endpoint)$ curl http://127.0.0.1:5000/tests/
@@ -88,15 +89,15 @@ Endpoint has both automatic and manual mode. Let's discover them!
 * This mode lets you test all your API on a painless way, just by typing:
 
 ```
-	fab supervise:yml_file=<yml_path**>, route:<spec_name**>, mode=<one_time or strict**>, interval=<60**>, test_mode=<True or False**>
+	fab supervise:spec_file=<spec_file**>, endpoint:<endpoint_alias**>, mode=<one_time or strict**>, interval=<60**>, test_mode=<True or False**>
 	**: Optional parameter.
-	# *By default, the yml_file is the one placed inside the /tests folder,*
-	# *the mode is 'one_time', interval is set to 60 and test_mode is False.*
+	# *By default, if no other spec_file has been provided, endpoint will use tests.yml.*
+	# *If the 'endpoint' parameter is empty, all the endpoints of that specification file will be tested.*
 	
 	Examples:
 	
-	fab supervise:yml_file=endpoint.yml, route=tests/get_shopping_cart, mode=strict, interval=10 # Check every 10 seconds
-	fab supervise:yml_file=endpoint.yml, route=tests/get_user							  		# Check just a single time
+	fab supervise:spec_file=tests, endpoint=get_shopping_cart, mode=strict, interval=10 # Check every 10 seconds
+	fab supervise:spec_file=tests, endpoint=get_user							  		# Check just a single time
 ```
 
 * You probable have noticed that we have a mode parameter with two possible values, what's all this about?
@@ -113,7 +114,7 @@ Endpoint has both automatic and manual mode. Let's discover them!
 ``` 
 
 * Just run the server and nothing else. You can then start either using tools as **'curl'** or simple
-  accessing to **http://127.0.0.1:5000/<spec_filename>/<endpoint>** at your favorite browser.
+  accessing to **http://127.0.0.1:5000/<spec_file>/<endpoint_alias>** at your favorite browser.
   
 Tests
 -----
@@ -123,7 +124,7 @@ As we mentioned before, you can run the **Endpoint's Test Suite** just by typing
 ```
 	fab test_suite
 ```
-> It will use both the endpoint.yml file from the tests/ folder and the mock server.
+> It will use both the **tests.yml** file from the specs/ folder and the mock server.
 
 You should get then something like:
 
@@ -140,5 +141,11 @@ OK
 
 </pre>
 ---
+
+Contributing
+------------
+
+If you'd like to contribute, just Fork the repository, create a branch with your changes and send a pull request. 
+Don't forget appending your name to AUTHORS ;)
 
 *Sunday, 6th January 2013*
