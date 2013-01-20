@@ -1,5 +1,6 @@
 import urlparse
 import json
+import os
 
 from requests.exceptions import ConnectionError, Timeout
 from werkzeug.wrappers import Request, Response
@@ -7,20 +8,20 @@ from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import NotImplemented
 from endpoint.utils import (dispatch_request, send_notification, make_request,
                             render_response)
-from endpoint.settings import SMTP_STATUS
+from endpoint.settings import SMTP_STATUS, SPECS_PATH
+from endpoint.readers.yaml_reader import YamlReader
 
 class Sentinel(object):
     """
     Sentinel will be in charge of making requests using the
     endpoints defined in the .yml file.
     """
-    def __init__(self, config, reader):
-        self.test_mode = config['test_mode']
-        self.endpoints = reader.get_calls()
+    def __init__(self):
         self.url_map = Map([
-            Rule('/', endpoint='get_batch_of_responses'),
-            Rule('/<int:id>', endpoint='get_response'),
-            Rule('/<alias>', endpoint='get_response')
+            Rule('/', endpoint='invalid_request'),
+            Rule('/<spec>/', endpoint='get_batch_of_responses'),
+            Rule('/<spec>/<int:id>', endpoint='get_response'),
+            Rule('/<spec>/<alias>', endpoint='get_response')
         ])
 
     def __call__(self, environ, start_response):
@@ -104,14 +105,20 @@ class Sentinel(object):
         """
         cube = []
         limit = None
-        if 'limit' in dict(request.args).keys():
-            limit = int(request.args['limit'])
-        for endpoint in self.endpoints:
-            if limit != None:
-                limit = limit - 1
-                if limit == -1:
-                    break
-            cube.append(self.process_call(endpoint))
+        try:
+            reader = YamlReader(values['spec'])
+        except IOError:
+            pass
+        else:
+            endpoints = reader.get_calls()
+            if 'limit' in dict(request.args).keys():
+                limit = int(request.args['limit'])
+            for endpoint in endpoints:
+                if limit != None:
+                    limit = limit - 1
+                    if limit == -1:
+                        break
+                cube.append(self.process_call(endpoint))
 
         return Response(json.dumps(cube))
     
@@ -121,19 +128,30 @@ class Sentinel(object):
         """
         block = {}
         counter = 0
-        if 'id' in values and values.get('id', 0) > 0:
-            try:
-                endpoint = self.endpoints[values['id'] - 1]
-            except IndexError:
-                pass
-            else:
-                block = self.process_call(endpoint)
-        elif 'alias' in values:
-            while counter < len(self.endpoints):
-                endpoint = self.endpoints[counter]
-                if endpoint['alias'] == values['alias']:
+        try:
+            reader = YamlReader(values['spec'])
+        except IOError:
+            pass
+        else:
+            endpoints = reader.get_calls()
+            if 'id' in values and values.get('id', 0) > 0:
+                try:
+                    endpoint = endpoints[values['id'] - 1]
+                except IndexError:
+                    pass
+                else:
                     block = self.process_call(endpoint)
-                    break
-                counter += 1
+            elif 'alias' in values:
+                while counter < len(endpoints):
+                    endpoint = endpoints[counter]
+                    if endpoint['alias'] == values['alias']:
+                        block = self.process_call(endpoint)
+                        break
+                    counter += 1
             
+        return Response(json.dumps(block))
+    
+    def invalid_request(self, request, **values):
+        block = {}
+        
         return Response(json.dumps(block))
