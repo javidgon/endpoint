@@ -8,7 +8,7 @@ The Endpoint's main goal is to check if your API's endpoints are working properl
 That "proper way" is specified in a *Specification file* with a defined structure that will work
 as a "strict sentinel" that supervises your responses' requirements.
 
-At the time of the 0.1 version, Endpoint supports API calls using **GET**, **POST** and **PUT** methods,
+Endpoint supports API calls using **GET**, **POST** and **PUT** methods,
 with **Basic** and **Digest AUTH**. Next step will be to include OAuth support as well, as many important
 systems are using this protocol.
 
@@ -82,11 +82,11 @@ Endpoint will respond you with a JSON object with the following structure:
 
 API
 ---
-Endpoint has both automatic and manual mode. Let's discover them!
+Endpoint supports both automatic and manual flavors.
 
-**1. Automatic mode.**
+**1. Automatic flavor.**
 
-* This mode lets you test all your API on a painless way, just by typing:
+* Lets you test all your API on a painless and automate way, just by typing:
 
 ```
 	fab supervise:spec_file=<spec_file**>, endpoint:<endpoint_alias**>, mode=<one_time or strict**>, interval=<60**>, test_mode=<True or False**>
@@ -100,14 +100,14 @@ Endpoint has both automatic and manual mode. Let's discover them!
 	fab supervise:spec_file=tests, endpoint=get_user							  		# Check just a single time
 ```
 
-* You probable have noticed that we have a mode parameter with two possible values, what's all this about?
-	* 'one_way': Check all the endpoints a single time (Interval param is not used)
+* You probably have noticed that we have a mode parameter with two possible values.
+	* 'one_way': Check all the endpoints a single time (Interval param not used)
 	* 'strict': Check all the endpoints regularly every <interval> seconds. Isn't it great?
 	
-**2. Manual mode.**
+**2. Manual flavor.**
 
-* This mode just runs the server and let you the responsibility of asking to the Endpoint server.
-  We saw an example of this above:
+* Runs the server and nothing else. You can then start either using tools as **'curl'** or simply
+  accessing to **http://127.0.0.1:5000** at your favorite browser.
   
 ```
 	python run_server.py
@@ -126,7 +126,7 @@ As we mentioned before, you can run the **Endpoint's Test Suite** just by typing
 ```
 > It will use both the **tests.yml** file from the specs/ folder and the mock server.
 
-You should get then something like:
+You should get then something similar to:
 
 <pre>
 
@@ -140,7 +140,15 @@ Ran 14 tests in 0.951s
 OK
 
 </pre>
----
+
+Making of
+---------
+
+Endpoint has been created using **Werkzeug**, which provides all the logic behind the routing process,
+the **Requests** library, in charge of making all the requests to the different enpoints,
+and **Fabric**, which comes in handy in the verification process«s automation.
+
+Please visit each project for further information.
 
 Contributing
 ------------
@@ -148,4 +156,7 @@ Contributing
 If you'd like to contribute, just Fork the repository, create a branch with your changes and send a pull request. 
 Don't forget appending your name to AUTHORS ;)
 
+---
+
 *Sunday, 6th January 2013*
+

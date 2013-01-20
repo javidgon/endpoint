@@ -1,19 +1,34 @@
 from __future__ import with_statement
-from fabric.api import local, abort, cd
-from endpoint.settings import SERVER
+from fabric.api import local, abort, lcd
 import os
 import time
 import requests
 import sys
+import glob
 
 PATH = os.path.abspath(os.path.dirname(__file__))
+
+def add_to_PYTHONPATH():
+    print "Checking if endpoint/ is already in the PYTHONPATH..."
+    python_bin = os.path.dirname(sys.executable)
+    python_lib = os.path.join(python_bin, '..', 'lib/')
+    python_version = glob.glob(os.path.join(python_lib + 'python*'))
+    python_site_packages = os.path.join(python_version[0], 'site-packages/')
+
+    if not os.path.exists(os.path.join(python_site_packages, 'endpoint.pth')):
+        print "Adding endpoint/ to the PYTHONPATH..."
+        with lcd(os.path.join(python_site_packages)):
+            local('touch endpoint.pth')
+            local('echo "%s" >> endpoint.pth' % os.path.join(PATH, '..'))
+    else:
+        print "It's already there. No changes have been applied." 
+        
 
 def test_suite():
     """
     Run the ENDPOINT application's tests suite.
     """
-    sys.path.append(os.path.join(PATH,'..'))
-    with cd(PATH):
+    with lcd(PATH):
         local("python run_mock.py &")
         time.sleep(3)
         local("nosetests")
@@ -39,7 +54,7 @@ def supervise(spec_file="tests", mode='one_time', endpoint='', interval=60, test
     except ValueError:
         abort("Interval parameter is not a number.")
     
-    with cd(PATH):
+    with lcd(PATH):
         print "Running server..."
         local("python run_server.py %s &" % spec_file)
         time.sleep(3)
