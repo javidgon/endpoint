@@ -80,6 +80,7 @@ def supervise(spec_file="tests", mode='one_time', endpoint='', interval=60, test
         local("killall python run_server.py")
     
 def _process_response(spec_file, endpoint, successes, errors):
+    from endpoint.settings import SERVER
     print "Making the requests..."
     response = requests.get("http://%s:%s/%s" % 
                               (SERVER['host'], SERVER['port'], os.path.join(spec_file, endpoint)))
